@@ -1,5 +1,7 @@
 package com.example.doan2.Product;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -12,9 +14,11 @@ import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.doan2.Event.ItemClickHandler;
+import com.example.doan2.Login.LoginActivity;
 import com.example.doan2.R;
 import com.example.doan2.Event.ViewUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -29,10 +33,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 
-//Vi do an cua bon e dung api free, nen khi chay bon e phai chay call api truoc.
-//Neu thay muon chay do an, thay lien he em (Kien - 0962926866)
-//Bon em cam on thay a ^^
-
 public class MainActivity extends AppCompatActivity {
 
     GridView gridView;
@@ -45,6 +45,11 @@ public class MainActivity extends AppCompatActivity {
     boolean isAzSorted = true;
     boolean isPriceSorted = true;
 
+//    SharedPreferences sf;
+
+//    private static final String sf_name = "my_sf";
+//    private static final String sf_isLogin = "isLogin";
+
     public interface RequestItem {
         @GET("products")
         Call<Item> getItem();
@@ -54,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // SharedPreferences
+//        sf = getSharedPreferences("my_sf", MODE_PRIVATE);
 
         // SearchView
         searchView = findViewById(R.id.searchView);
@@ -111,7 +119,30 @@ public class MainActivity extends AppCompatActivity {
 
         // Logo
         Logo = findViewById(R.id.Logo);
-        ViewUtils.setLogoClickListener(this, Logo);
+        Logo.setOnClickListener(view -> {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Log Out")
+                    .setMessage("Are you sure you want to log out?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        // Clear the login state from SharedPreferences
+                        SharedPreferences sf = getSharedPreferences("my_sf", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sf.edit();
+                        editor.putBoolean("isLogin", false);
+                        editor.apply();
+
+                        // Redirect to LoginActivity
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Clear back stack
+                        startActivity(intent);
+                        finish(); // Close MainActivity
+                    })
+                    .setNegativeButton("No", (dialog, which) -> {
+                        // Dismiss the dialog
+                        dialog.dismiss();
+                    })
+                    .show();
+        });
+
 
         // Sort
         sort = findViewById(R.id.sort);

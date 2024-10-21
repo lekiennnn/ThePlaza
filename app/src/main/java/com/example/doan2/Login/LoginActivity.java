@@ -2,6 +2,7 @@ package com.example.doan2.Login;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -28,6 +29,11 @@ public class LoginActivity extends AppCompatActivity {
     Button login_btn;
     TextView signup_txt;
 
+    SharedPreferences sf;
+
+    private static final String sf_name = "my_sf";
+    private static final String sf_isLogin = "isLogin";
+
     // Retrofit
     public interface RequestAccount {
         @POST("login")
@@ -44,6 +50,8 @@ public class LoginActivity extends AppCompatActivity {
         password_txt = findViewById(R.id.password_txt);
         login_btn = findViewById(R.id.login_btn);
         signup_txt = findViewById(R.id.sign_up_txt);
+
+        sf = getSharedPreferences("my_sf", MODE_PRIVATE);
 
         // Retrofit
         Retrofit retrofit = new Retrofit.Builder()
@@ -73,6 +81,13 @@ public class LoginActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         AccountResponse accountResponse = response.body();
                         if (accountResponse != null) {
+
+                            // if/else cho isLogin
+
+                            SharedPreferences.Editor editor = sf.edit();
+                            editor.putBoolean(sf_isLogin, true);
+                            editor.apply();
+
                             Account user = accountResponse.getUser();
                             Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
